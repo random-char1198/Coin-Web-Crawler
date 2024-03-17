@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>data</title>
+    <script type="text/javascript" src="/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript">
+
+      function getPopularData() {
+        $.ajax({
+          url: "/popular",
+          type: "GET",
+          dataType: "json",
+          success: function(data){
+            let topList = data.topList
+            let tmp = ''
+            for (let i = 0; i < topList.length; i++) {
+              tmp += "<button onclick=\"getSingleData('" + topList[i].title + "')\">" + topList[i].curUri + "</button>" + " => number:" + topList[i].number + "<br>"
+            }
+            console.log(tmp)
+            document.getElementById("popular").innerHTML = ''
+            document.getElementById("popular").innerHTML = tmp
+          }});
+      }
+
+      function crawl(){
+          $.ajax({
+          url: "/crawl",
+          type: "GET",
+          dataType: "json",
+          success: function(data){
+            console.log("crawl")
+          }});
+      }
+
+      function getSingleData(pageX){
+        $.ajax({
+          url: "/" +"page/"+ pageX,
+          type: 'GET',
+          dataType: "json",
+          success: function(data){
+            let content = data.content
+            let subPage = data.subPage
+            let tmp = ''
+            tmp += content
+            tmp += '<br>'
+            for (let i = 0; i < subPage.length; i++) {
+              tmp += "<a href='" + subPage[i] + "'>" + subPage[i] + "</a>" + "<br>"
+            }
+            document.getElementById("singlePage").innerHTML = ''
+            document.getElementById("singlePage").innerHTML = tmp
+          }});
+      }
+      function pageRank(){
+            $.ajax({
+                url: "pageRank",
+                type: 'GET',
+                dataType: "json",
+                success: function(output){
+                    console.log("FRONT END")
+                    console.log("1+:"+output.data)
+
+                    let content = output.data
+                    let tmp = "<details><dl>"
+
+                    for(let i = 0;i<content.length;i++){
+                        tmp+="<dt>"
+                        tmp+=content[i]
+                        tmp+="</dt>"
+                        tmp+="<br>"
+                    }
+                    tmp += "</dl><details>"
+                    // let subPage = data.subPage
+                    // tmp += content
+                    // tmp += '<br>'
+                    // for(let i = 0;i<data.length;i++){
+                    //   console.log(data)
+                    // }
+                    // for (let i = 0; i < subPage.length; i++) {
+                    //   tmp += "<a href='" + subPage[i] + "'>" + subPage[i] + "</a>" + "<br>"
+                    // }
+                    document.getElementById("pageRank").innerHTML = ''
+                    document.getElementById("pageRank").innerHTML = tmp
+                }});
+        }
+      function search() {
+          console.log("searching...")
+          let word = document.getElementById("info").value.trim()
+          $.ajax({
+              url: "/search",
+              type: 'POST',
+              dataType: "json",
+              contentType: "application/json",
+              data: JSON.stringify({"word": word}),
+              success: function(res){
+                let code = res.code
+
+                if (code === 500) {
+                    alert("word not find.")
+                }else if (code === 200) {
+                    let data = res.data
+
+                    let html = '<h2>search info:</h2>'
+                    html += '<br>'
+                    for (let i = 0; i < data.length; i++) {
+                        html += "index:" +  (i+1) + "<br>"
+                        html += "title:" + data[i].title + "<br>"
+                        html += "curUri:" + "<br>   " + data[i].curUri + "<br>"
+                        html += "content:" + "<br>  " + data[i].content + "<br><br>"
+                    }
+
+                    document.getElementById("searchBody").innerHTML = ''
+                    document.getElementById("searchBody").innerHTML = html
+
+                }
+          }});
+      }
+
+    </script>
+</head>
+<body>
+
+
+    <div>
+        <form action="#" onsubmit="return false;">
+            <label>search function</label>
+            <br>
+            <input placeholder="please input keyword:" id="info" style="width: 350px" />
+            <br>
+            <button onclick="search()">search</button>
+        </form>
+    </div>
+
+    <br>
+
+    <div id="searchBody">
+
+    </div>
+
+    <button onclick="getPopularData()">show popular</button>
+    <br>
+    <button onclick="crawl()">crawl</button>
+
+    <h2>popular</h2>
+    <div id="popular">
+
+    </div>
+
+    <h2>Single page</h2>
+    <div id="singlePage">
+
+    </div>
+    <h2>Page Rank</h2>
+    <div id="pageRank">
+        <button onclick="pageRank()">Page Rank</button>
+    
+    </div>
+</body>
+</html>

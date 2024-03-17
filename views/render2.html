@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>data</title>
+    <script type="text/javascript" src="/js/jquery-1.11.3.js"></script>
+    <script type="text/javascript">
+
+      function search() {
+          let url = ""
+          console.log("searching...")
+          let choseItem = document.getElementById("choseItem").value.trim()
+
+          let q = document.getElementById("infoQ").value.trim()
+          let boost = document.getElementById("infoBoost").value.trim()
+          let limit = document.getElementById("infoLimit").value.trim()
+          if(limit==="")
+          {
+              limit = 10
+          }
+          if (choseItem === "fruit") {
+              url = "/fruit"
+          }
+
+          if (choseItem === "personal") {
+              url = "/personal"
+          }
+
+          $.ajax({
+              url: url,
+              type: 'POST',
+              dataType: "json",
+              contentType: "application/json",
+              data: JSON.stringify({"q": q, "boost": boost, "limit": limit}),
+              success: function(res){
+                let code = res.code
+
+                if (code === 500) {
+                    alert("word not find.")
+                }else if (code === 200) {
+
+
+                    let data = res.data
+
+                    if ( limit > data.length ){
+                        limit = data.length
+                    }
+
+                    let html = '<h2>search info:</h2>'
+                    html += '<br>'
+                    for (let i = 0; i < limit; i++) {
+                        html += "index:" +  (i+1) + "<br>"
+                        html += "title:" + data[i].title + "<br>"
+                        html += "wordCount:" + data[i].wd + "<br>"
+                        html += "curUri:" + "<br>   " + "<a href='"+data[i].curUri+"'>" +  data[i].curUri + "</a>" + "<br>"
+                        html += "score:" + "<br>  " + data[i].score + "<br>"
+                        html += "pageRankScore:" + "<br>   " + data[i].pageRankScore + "<br>"
+                        if (boost === "true") {
+                            html += "score_pageScore:" + "<br>   " + data[i].score_pageScore + "<br>"
+                        }
+                        html += "inlink:" + "<br>   " + data[i].inlink + "<br>"
+                        html += "outlink:" + "<br>   " + data[i].outlink + "<br>"
+                        html += "content:" + "<br>  " + data[i].content + "<br><br>"
+                    }
+
+
+                    document.getElementById("searchBody").innerHTML = ''
+                    document.getElementById("searchBody").innerHTML = html
+
+                }
+          }});
+      }
+
+    </script>
+</head>
+<body>
+
+
+    <div>
+        <form action="#" onsubmit="return false;">
+            <h2>search function</h2>
+            <br>
+            <br>
+            <label>please input fruit or personal:</label>
+            <br>
+            <input placeholder="please input fruit or personal:" id="choseItem" style="width: 350px" />
+            <br>
+            <label>please input q:</label>
+            <br>
+            <input placeholder="please input q:" id="infoQ" style="width: 350px" />
+            <br>
+            <label>please input boost, true/false:</label>
+            <br>
+            <input placeholder="please input boost, true/false:" id="infoBoost" style="width: 350px" />
+            <br>
+            <label>please input q: min 10, max 50, default 10</label>
+            <br>
+            <input placeholder="please input q: min 10, max 50, default 10" id="infoLimit" style="width: 350px" />
+            <br>
+            <br>
+            <button onclick="search()">search</button>
+        </form>
+    </div>
+
+
+    <br>
+    <br>
+
+    <div id="searchBody">
+
+    </div>
+
+
+</body>
+</html>
